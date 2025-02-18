@@ -1,56 +1,25 @@
 ##################################################################
-#_____ IAM - ASSUME ROLE ________________________________________
+#_____ LAMBDA ____________________________________________________
 ##################################################################
-data "aws_iam_policy_document" "assume_role" {
 
-  dynamic "statement" {
-    for_each = var.iam_role_configs.statement
-    content {
-      effect = statement.value.effect
+resource "aws_lambda_function" "stop_ec2_lambda" {
+  function_name = "stop_ec2_instances"
+  role          = module.iam_role.role_arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.8"
 
-      principals {
-        type        = statement.value.type
-        identifiers = statement.value.identifiers
-      }
-
-      actions = statement.value.actions
-    }
-  }
+  filename      = "lambda_function.zip"
+  source_code_hash = filebase64sha256("lambda_function.zip")
 }
 
-resource "aws_iam_role" "role" {
-  name                 = var.iam_role_configs.name
-  max_session_duration = var.iam_role_configs.max_session_duration
-  assume_role_policy   = data.aws_iam_policy_document.assume_role.json
-}
 
 ##################################################################
-#_____ IAM - POLICIES ___________________________________________
+#_____ EVENT BRIDGE ______________________________________________
 ##################################################################
-data "aws_iam_policy_document" "policy" {
 
-    dynamic "statement" {
-      for_each = var.iam_policies.statement
-      content {
-        sid       = statement.value.sid
-        effect    = statement.value.effect
-        actions   = statement.value.actions
-        resources = statement.value.resources
-      }
-  }
+resource "aws_cloudwatch_event_rule" "lambda_schedule" {
+  name                = "lambda-daily-schedule"
+  description         = "Regra para agendar execução da Lambda todos os dias às 20h em Brasília"
+  schedule_expression = "cron(0 23 * * ? *)"
 }
 
-resource "aws_iam_policy" "policy" {
-  name        = var.iam_policies.name
-  description = var.iam_policies.description
-  policy      = data.aws_iam_policy_document.policy.json
-
-   depends_on = [data.aws_iam_policy_document.policy]
-}
-
-resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = aws_iam_role.role.name
-  policy_arn = aws_iam_policy.policy.arn
-
-  depends_on = [aws_iam_policy.policy]
-}
