@@ -4,11 +4,12 @@
 
 resource "aws_lambda_function" "stop_ec2_lambda" {
   function_name = "stop_ec2_instances"
-  role          = module.iam_role.role_arn
+  role          = module.iam_role.iam_role_arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.8"
-
-  filename      = "lambda_function.zip"
+  timeout = 20
+  
+  filename         = "lambda_function.zip"
   source_code_hash = filebase64sha256("lambda_function.zip")
 }
 
