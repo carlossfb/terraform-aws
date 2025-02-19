@@ -11,7 +11,7 @@ variable "iam_role_configs" {
     }))
   })
 
-  description = "Configuração de IAM Role com permissões."
+  description = "Configuracoes basicas da role."
 
   validation {
     condition     = (length(var.iam_role_configs.name) > 0 && length(var.iam_role_configs.statement) > 0)
@@ -35,6 +35,6 @@ variable "iam_policies" {
       resources = optional(list(string), ["*"])
     }))
   })
-  description = ""
+  description = "Politicas para atribuir a role"
 }
 
