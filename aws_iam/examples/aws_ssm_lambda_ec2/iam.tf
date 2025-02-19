@@ -23,9 +23,15 @@ module "iam_role" {
     description = "Allow stop ec2 instance"
     statement = [
       {
-        sid       = "AllowSSMSendCommand"
+        sid       = "AllowLambdaStopEc2"
         effect    = "Allow"
         actions   = ["ec2:StopInstances"]
+        resources = ["*"]
+      },
+      {
+        sid       = "AllowLambdaLogs"
+        effect    = "Allow"
+        actions   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         resources = ["*"]
       }
     ]
