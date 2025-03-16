@@ -23,18 +23,16 @@ module "iam_role" {
     description = "Allow modify specific bucket"
     statement = [
       {
-        "Version" : "2012-10-17",
-        "Statement" : [
-          {
-            "Effect" : "Allow",
-            "Action" : [
-              "s3:*",
-              "s3-object-lambda:*"
-            ],
-            "Resource" : "${output.arn_bucket}"
-          }
-        ]
+        sid       = "AllowRegistryManageBucket"
+        effect    = "Allow"
+        actions   = ["s3-object-lambda:*", "s3:*"]
+        resources = ["${module.bucket.arn}"]
       }
     ]
   }
+}
+
+resource "aws_iam_instance_profile" "ec2_s3_gitlab_registry_profile" {
+  name = "ec2-s3-gitlab-profile"
+  role = module.iam_role.iam_role_name
 }
